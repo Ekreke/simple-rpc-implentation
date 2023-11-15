@@ -37,6 +37,8 @@ func NewServer() *Server {
 
 var DefaultServer = NewServer()
 
+// Accept accepts connections on the listener and serves requests
+// for each incoming connection.
 func (server *Server) Accept(lis net.Listener) {
 	for {
 		conn, err := lis.Accept()
@@ -50,17 +52,26 @@ func (server *Server) Accept(lis net.Listener) {
 
 }
 
+// Accept accepts connections on the listener and serves requests
+// for each incoming connection.
+
 func Accept(lis net.Listener) { DefaultServer.Accept(lis) }
 
 func (server *Server) ServeConn(conn io.ReadWriteCloser) {
+	// close
 	defer func() {
 		_ = conn.Close()
 	}()
+
+	//empty option
 	var opt Option
+	// get decoded opton instance; in particully ,
+	// the option is encoded in json & contains the encodeing ways
 	if err := json.NewDecoder(conn).Decode(&opt); err != nil {
 		log.Println("rpc server : options erro:", err)
 		return
 	}
+	// the magicNumber is to verify if it is a real rpc request
 	if opt.MagicNumber != MagicNumber {
 		log.Printf("rpc server: invalid magic number %x", opt.MagicNumber)
 		return
